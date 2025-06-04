@@ -1,6 +1,6 @@
 package com.buka.pojo;
 
-import javax.xml.soap.Text;
+
 
 public class CinemaHome {
     private int cinemaHomeId;

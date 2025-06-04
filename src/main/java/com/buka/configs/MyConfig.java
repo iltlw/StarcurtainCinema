@@ -1,7 +1,7 @@
 package com.buka.configs;
 
-
-
+import com.github.wxpay.sdk.IWXPayDomain;
+import com.github.wxpay.sdk.WXPayConfig;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
