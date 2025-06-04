@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>影院列表</title>
+  <script src="../../js/axios0.18.js"></script>
+  <script src="../../js/vue.js"></script>
+  <style>
+    table,tr,td,th{
+      border: black solid 1px;
+      border-collapse: collapse;
+      width: 1000px;
+      text-align: center;
+    }
+
+  </style>
+</head>
+<body>
+<div id="app" style="width: 100%">
+  <div style="margin: auto;width: 1000px">
+    <img :src="movie.movieImgUrl" width="100">
+    <table>
+      <tr>
+        <th>影厅名</th>
+        <th>开始时间</th>
+        <th>结束时间</th>
+        <th>票价</th>
+        <th>购买</th>
+      </tr>
+      <tr v-for="item in arrangeList">
+        <td>{{item.cinemaHome.cinemaHomeName}}</td>
+        <td>{{getDateStr(new Date(item.arrangeMovieStartTime))}}</td>
+        <td>{{getDateStr(new Date(item.arrangeMovieEndTime))}}</td>
+        <td>{{item.arrangeMoney/100}}</td>
+        <td>
+          <input type="button" value="购买" @click="buy(item)">
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
+</body>
+</html>
+<script>
+  new Vue({
+    el:"#app",
+    data:{
+      arrangeList:[],
+      movie:'',
+    },
+    methods:{
+      buy(item){
+        localStorage.setItem("arrangeItem",JSON.stringify(item));
+        window.location="buy.html";
+      },
+      getDateStr(date){
+        return date.getFullYear()+"/"+
+                (date.getMonth()+1)+"/"+
+                date.getDate()+" "+
+                date.getHours()+":"+
+                date.getMinutes();
+      },
+      getArrangeList() {
+        let _this =this;
+        axios.post("http://localhost:8080/cinema/user/arrangelist",
+        "movieId=" + this.movie.movieId).then((resp)=>{
+          console.log(resp.data);
+          if(resp.data.code===200){
+            _this.arrangeList=resp.data.data;
+          }else{
+            alert(resp.data.msg);
+          }
+        })
+      }
+      },
+    mounted(){
+      this.movie= JSON.parse(localStorage.getItem("movie"));
+      this.getArrangeList();
+    }
+
+  })
+</script>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>添加影院</title>
+  <script src="../../js/axios0.18.js"></script>
+  <script src="../../js/vue.js"></script>
+</head>
+<body>
+<div id="app">
+  <form @submit.prevent="submitFrom">
+   选择电影：
+    <select v-model="selMovieId">
+        <option value="0">--请选择---</option>
+      <option v-for="item in movieList" :value="item.movieId">
+         {{item.movieName}}
+      </option>
+    </select><br/>
+    选择影厅：
+    <select v-model="selHouseId">
+        <option value="0">--请选择---</option>
+        <option v-for="item in houseList" :value="item.cinemaHomeId">
+            {{item.cinemaHomeName}}
+        </option>
+    </select><br/>
+    选择开始时间：
+    <input type="datetime-local" v-model="startTime" required><br/>
+    票价：
+    <input type="number" v-model="money" required><br/>
+    <input type="submit" value="创建"><br>
+    <br>
+  </form>
+</div>
+</body>
+</html>
+<script>
+  new Vue({
+    el:"#app",
+    data:{
+        selMovieId:0,
+        selHouseId:0,
+        movieList:[],
+        houseList:[],
+        startTime:'',
+        money:'',
+    },
+    methods:{
+      getMovieList() {
+        let _this =this;
+        axios.post("http://localhost:8080/cinema/cinema/movielist").then((resp)=>{
+          console.log(resp.data);
+          if(resp.data.code===200){
+            _this.movieList=resp.data.data;
+          }else{
+            alert(resp.data.msg);
+          }
+
+        })
+      },
+        getHouseList() {
+            let _this =this;
+            axios.post("http://localhost:8080/cinema/cinema/houselistbyarrange").then((resp)=>{
+                console.log(resp.data);
+                if(resp.data.code===200){
+                    _this.houseList=resp.data.data;
+                }else{
+                    alert(resp.data.msg);
+                }
+
+            })
+        },
+
+      selfile(event) {
+        this.imgFile = event.target.files[0];
+      },
+      submitFrom() {
+        console.log(this.imgFile);
+        const formData = new FormData();
+        formData.append("movieId", this.selMovieId);
+        formData.append("houseId", this.selHouseId);
+        formData.append("startTime", this.startTime);
+        formData.append("money", this.money);
+        axios.post("http://localhost:8080/cinema/cinema/addarrange", formData).then(function (resp) {
+          console.log(resp.data);
+          if (resp.data.code === 200) {
+            alert("添加成功");
+            window.location="home.html";
+          }else{
+            alert(resp.data.msg);
+          }
+        });
+      }
+    },
+      mounted(){
+        this.getMovieList();
+        this.getHouseList();
+      }
+  })
+</script>

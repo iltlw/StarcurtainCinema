@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>购票</title>
+    <script src="../../js/axios0.18.js"></script>
+    <script src="../../js/vue.js"></script>
+    <script src="../../js/qrcode.min.js"></script>
+</head>
+<body>
+<div id="app" style="width: 100%">
+    <h1 >选座</h1>
+    <table style="margin: auto">
+        <tr v-for="(row,i) in seatInfo">
+            <td v-for="(col,j) in row">
+                <span v-if="col===0" @click="sel(i,j)"><img src="../../img/微信图片_20240127150302.png" width="21"></span>
+                <span v-if="col===1"><img src="../../img/微信图片_20240127150236.png" width="21"></span>
+                <span v-if="col===2"><img src="../../img/微信图片_20240127150255.png" width="21"></span>
+                <span v-if="col===3"@click="sel(i,j)"><img src="../../img/20db746794f5d9efb37e955e746e44a.png" width="21"></span>
+            </td>
+        </tr>
+    </table>
+    <input v-if="!isPay" type="button" value="确认购票" @click="buy">
+    <div v-if="isPay">
+        <h2>请用微信支付</h2>
+        <div id="qrcode"></div>
+    </div>
+  </div>
+</body>
+</html>
+<script>
+    new Vue({
+        el:"#app",
+        data:{
+           arrangeItem:{},
+            seatInfo:[],
+            isPay:false,
+            payId:'',
+        },
+        methods:{
+            sel(i, j) {
+                console.log(this.seatInfo[i][j])
+                if (this.seatInfo[i][j] === 3) {
+                    this.seatInfo[i].splice(j, 1, 0);
+                } else {
+                    this.seatInfo[i].splice(j, 1, 3);
+                }
+            },
+           getSeatInfo(){
+               let _this=this;
+               axios.post("http://localhost:8080/cinema/user/seatinfo",
+               "arrangeId="+this.arrangeItem.arrangeId).then((resp)=>{
+                   console.log(resp.data);
+                   _this.seatInfo=resp.data.data;
+               });
+           },
+            getPayState(){
+                let _this=this;
+                axios.post("http://localhost:8080/cinema/user/paystate",
+                    "payId="+this.payId).then((resp)=>{
+
+                    console.log(resp.data);
+                    _this.seatInfo=resp.data.data;
+                    if(resp.data.code===200){
+
+                        if(resp.data.data===2){
+                            alert("已支付");
+                            window.location="home.html";
+                        }else{
+                            setTimeout(()=>{
+                                _this.getPayState();
+                            },1000);
+                        }
+                    }else{
+                        alert(resp.data.msg);
+                    }
+                });
+            },
+            buy(){
+                let _this=this;
+                let seats='';
+                for(let i=0;i<this.seatInfo.length;i++){
+                    for(let j=0;j<this.seatInfo[i].length;j++){
+                        if(this.seatInfo[i][j]===3){
+                            seats=seats+"&seat=["+i +","+j+"]";
+                        }
+                    }
+                }
+                this.isPay=true;
+                axios.post("http://localhost:8080/cinema/user/buy",
+                    "arrangeId="+this.arrangeItem.arrangeId+seats).then((resp)=>{
+                        console.log(resp.data);
+                        if(resp.data.code===200){
+                            let code_url = resp.data.data.code_url;
+                            _this.payId=resp.data.data.payId;
+                            let qrcode = new QRCode(document.getElementById("qrcode"),{width:200,height:200});
+                            qrcode.makeCode(code_url);
+                            _this.getPayState();
+                        }else{
+                            alert(resp.data.msg);
+                        }
+
+                })
+
+            }
+        },
+        mounted(){
+           this.arrangeItem=JSON.parse(  localStorage.getItem("arrangeItem"));
+       this.getSeatInfo();
+        }
+    })
+</script>

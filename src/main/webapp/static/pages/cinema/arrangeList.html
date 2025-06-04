@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>排片列表</title>
+  <script src="../../js/axios0.18.js"></script>
+  <script src="../../js/vue.js"></script>
+  <style>
+    table,tr,td,th{
+      margin: auto;
+      border: black solid 1px;
+      border-collapse: collapse;
+      width: 1000px;
+      text-align: center;
+    }
+
+  </style>
+</head>
+<body>
+<div id="app" style="width: 100%">
+  <table>
+    <tr>
+      <th>电影名</th>
+      <th>影厅名</th>
+      <th>开始时间</th>
+      <th>结束时间</th>
+      <th>票价</th>
+      <th>状态</th>
+    </tr>
+    <tr v-for="item in arrangeList">
+      <td>{{item.movie.movieName}}</td>
+      <td>{{item.cinemaHome.cinemaHomeName}}</td>
+      <td>{{getDateStr(new Date(item.arrangeMovieStartTime))}}</td>
+      <td>{{getDateStr(new Date(item.arrangeMovieEndTime))}}</td>
+      <td>{{item.arrangeMoney/100}}</td>
+      <td v-if="item.arrangeState==0">关闭</td>
+      <td v-if="item.arrangeState==1">正常</td>
+    </tr>
+  </table>
+</div>
+</body>
+</html>
+<script>
+  new Vue({
+    el:"#app",
+    data:{
+      arrangeList:[],
+    },
+    methods:{
+      getDateStr(date){
+        return date.getFullYear()+"/"+
+                (date.getMonth()+1)+"/"+
+                date.getDate()+" "+
+                date.getHours()+":"+
+                date.getMinutes()+":"+date.getSeconds();
+      },
+      getArrangeList() {
+        let _this =this;
+        axios.post("http://localhost:8080/cinema/cinema/arrangelist").then((resp)=>{
+          console.log(resp.data);
+          if(resp.data.code===200){
+            _this.arrangeList=resp.data.data;
+          }else{
+            alert(resp.data.msg);
+          }
+
+        })
+
+      },
+      changeCinema(mid,state){
+        let _this = this;
+        axios.post("http://localhost:8080/cinema/platform/changecinemastate",
+                "cinemaId="+mid+"&state="+state).then((resp)=>{
+          console.log(resp.data);
+          if(resp.data.code===200){
+            _this.getArrangeList();
+          }else{
+            alert(resp.data.msg);
+          }
+        })
+      }
+    },
+    mounted(){
+      this.getArrangeList();
+    }
+  })
+</script>

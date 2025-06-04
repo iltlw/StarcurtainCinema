@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>添加电影</title>
+  <script src="../../js/axios0.18.js"></script>
+  <script src="../../js/vue.js"></script>
+</head>
+<body>
+<div id="app">
+  <form @submit.prevent="submitFrom">
+    电影名：<input type="text" v-model="mname" required>
+    时长：<input type="number" v-model="mtime" required>
+    选择海报:<input type="file" @change="selfile" required>
+    <input type="submit" value="上传"><br>
+    <br>
+  </form>
+</div>
+</body>
+</html>
+<script>
+  new Vue({
+    el:"#app",
+    data:{
+      mname:'',
+      mtime:'',
+      imgFile:''
+    },
+    methods:{
+      selfile(event) {
+        this.imgFile = event.target.files[0];
+      },
+      submitFrom() {
+        console.log(this.imgFile);
+        const formData = new FormData();
+        formData.append("movieName", this.mname);
+        formData.append("movieTime", this.mtime);
+        formData.append("file", this.imgFile);
+        axios.post("http://localhost:8080/cinema/platform/addmovie", formData).then(function (resp) {
+          console.log(resp.data);
+          if (resp.data.code === 200) {
+            alert("上传成功");
+            window.location="home.html";
+          }else{
+            alert(resp.data.msg);
+          }
+        });
+      }
+    }
+  })
+</script>

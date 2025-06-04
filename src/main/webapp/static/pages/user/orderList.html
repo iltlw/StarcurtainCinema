@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>我的订单</title>
+  <script src="../../js/axios0.18.js"></script>
+  <script src="../../js/vue.js"></script>
+  <style>
+    table,tr,td,th{
+      border: black solid 1px;
+      border-collapse: collapse;
+      width: 1000px;
+      text-align: center;
+    }
+
+  </style>
+</head>
+<body>
+<div id="app" style="width: 100%">
+  <div style="margin: auto;width: 1000px">
+    <img :src="movie.movieImgUrl" width="100">
+    <table>
+      <tr>
+        <th>订单编号</th>
+        <th>下单时间</th>
+        <th>支付状态</th>
+        <th>操作</th>
+      </tr>
+      <tr v-for="item in orderList">
+        <td>{{item.payNum}}</td>
+        <td>{{getDateStr(new Date(item.payCreateTime))}}</td>
+        <td v-if="item.payState==1">未支付</td>
+        <td v-if="item.payState==2">已支付</td>
+        <td v-if="item.payState==3">已退款</td>
+         <td>
+           <input type="button" value="查看详情" @click="toOrderInfo(item)">
+         </td>
+      </tr>
+    </table>
+  </div>
+</div>
+</body>
+</html>
+<script>
+  new Vue({
+    el:"#app",
+    data:{
+      orderList:[],
+      movie:'',
+    },
+    methods: {
+      toOrderInfo(item){
+        localStorage.setItem("payOrder",JSON.stringify(item));
+        window.location="orderInfo.html";
+
+      },
+      getDateStr(date){
+        return date.getFullYear()+"/"+
+                (date.getMonth()+1)+"/"+
+                date.getDate()+" "+
+                date.getHours()+":"+
+                date.getMinutes();
+      },
+      getOrderList(){
+        let _this=this;
+        axios.post("http://localhost:8080/cinema/user/myorder")
+                .then((resp)=>{
+                  console.log(resp.data);
+                  if(resp.data.code===200){
+                    _this.orderList=resp.data.data;
+
+                  }else{
+                    alert(resp.data.msg);
+                  }
+
+        })
+      }
+    },
+    mounted(){
+      this.getOrderList();
+
+    }
+
+  })
+</script>

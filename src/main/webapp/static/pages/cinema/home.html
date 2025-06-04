@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>管理后台</title>
+    <script src="../../js/axios0.18.js"></script>
+    <script src="../../js/vue.js"></script>
+</head>
+<body>
+<div id="app">
+    <table>
+        <tr>
+            <td><input type="button" value="影厅列表" @click="toHouseList"></td>
+            <td><input type="button" value="添加影厅" @click="toAddHouse"></td>
+        </tr>
+        <tr>
+            <td><input type="button" value="排片列表" @click="toArrangeList"></td>
+            <td><input type="button" value="添加排片" @click="toAddArrange"></td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el:"#app",
+        data:{
+            username:'',
+            password:'',
+        },
+        methods:{
+            toAddHouse() {
+                window.location="addHouse.html";
+            },
+            toHouseList(){
+                window.location="houseList.html";
+            },
+            toAddArrange(){
+                window.location="addArrange.html";
+            },
+            toArrangeList(){
+                window.location="arrangeList.html";
+            }
+
+        }
+    })
+</script>

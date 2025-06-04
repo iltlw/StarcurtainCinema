@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<input type="button" value="按钮" onclick="cli1(1)">
+<input type="button" value="按钮2" onclick="getcli()">
+</body>
+</html>
+<script>
+    function cli1(payId) {
+        let json = {a: 1, b: 2}
+        localStorage.setItem("pId", JSON.stringify(json));
+    }
+
+    function getcli() {
+        let jsonStr = localStorage.getItem("pId");
+        let json = JSON.parse(jsonStr);
+        alert(jsonStr)
+    }
+
+</script>

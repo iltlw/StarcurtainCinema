@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>添加影院</title>
+  <script src="../../js/axios0.18.js"></script>
+  <script src="../../js/vue.js"></script>
+</head>
+<body>
+<div id="app">
+  <form @submit.prevent="submitFrom">
+    影院名：<input type="text" v-model="cname" required><br/>
+    登录密码：<input type="password" v-model="cpassword" required><br/>
+    影院地址:<input type="text" v-model="caddress" required><br/>
+    <input type="submit" value="添加"><br>
+    <br>
+  </form>
+</div>
+</body>
+</html>
+<script>
+  new Vue({
+    el:"#app",
+    data:{
+      cname:'',
+      cpassword:'',
+      caddress:''
+    },
+    methods:{
+      selfile(event) {
+        this.imgFile = event.target.files[0];
+      },
+      submitFrom() {
+        console.log(this.imgFile);
+        const formData = new FormData();
+        formData.append("cinemaName", this.cname);
+        formData.append("cinemaPassword", this.cpassword);
+        formData.append("cinemaAddress", this.caddress);
+        axios.post("http://localhost:8080/cinema/platform/addcinema", formData).then(function (resp) {
+          console.log(resp.data);
+          if (resp.data.code === 200) {
+            alert("添加成功");
+            window.location="home.html";
+          }else{
+            alert(resp.data.msg);
+          }
+        });
+      }
+    }
+  })
+</script>

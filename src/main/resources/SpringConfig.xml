@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+<context:component-scan base-package="com.buka"/>
+    <mvc:annotation-driven/>
+    <mvc:default-servlet-handler/>
+    <tx:annotation-driven/>
+    <context:property-placeholder location="classpath*:jdbc.properties"/>
+<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    <property name="dataSource" ref="dataSource"/>
+ </bean>
+    <bean class="org.springframework.web.multipart.commons.CommonsMultipartResolver" id="multipartResolver"/>
+
+    <bean class="com.alibaba.druid.pool.DruidDataSource" id="dataSource">
+       <property name="driverClassName" value="${jdbc.driver}"/>
+       <property name="url" value="${jdbc.url}"/>
+       <property name="username" value="${jdbc.username}"/>
+       <property name="password" value="${jdbc.password}"/>
+   </bean>
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactory">
+        <property name="configLocation" value="classpath:mybatisConfig.xml"/>
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.buka.mapper"/>
+     </bean>
+    <bean class="org.springframework.web.multipart.commons.CommonsMultipartResolver" id="commonsMultipartResolver"/>
+
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/platform/**"/>
+            <mvc:exclude-mapping path="/platform/login"/>
+            <bean class="com.buka.handlers.AdminSessionHandler"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/cinema/**"/>
+            <mvc:exclude-mapping path="/cinema/login"/>
+            <bean class="com.buka.handlers.CinemaSessionHandler"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+    <bean class="com.buka.configs.MyConfig" id="myConfig"/>
+    <bean class="com.github.wxpay.sdk.WXPay" id="wxPay">
+        <constructor-arg name="config" ref="myConfig"/>
+    </bean>
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/user/**"/>
+            <mvc:exclude-mapping path="/user/login"/>
+            <mvc:exclude-mapping path="/user/regis"/>
+            <mvc:exclude-mapping path="/user/movielist"/>
+            <mvc:exclude-mapping path="/user/arrangelist"/>
+            <mvc:exclude-mapping path="/user/notify_url"/>
+            <bean class="com.buka.handlers.UserSessionHandler"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+</beans>

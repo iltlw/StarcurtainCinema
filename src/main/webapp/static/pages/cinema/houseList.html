@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>影厅列表</title>
+    <script src="../../js/axios0.18.js"></script>
+    <script src="../../js/vue.js"></script>
+    <style>
+        .tb1{
+            margin: auto;
+            border: black solid 1px;
+            border-collapse: collapse;
+            width: 1000px;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+<div id="app" style="width: 100%">
+    <table style="text-align:center;border-collapse: collapse;border: black solid 1px;width: 1000px;margin: auto">
+        <tr style="border: black solid 1px;">
+            <th style="border: black solid 1px;">影厅名</th>
+            <th style="border: black solid 1px;">座位信息</th>
+            <th style="border: black solid 1px;">状态</th>
+            <th style="border: black solid 1px;">操作</th>
+            <th style="border: black solid 1px;">操作1</th>
+
+        </tr>
+        <tr v-for="item in houseList" style="border: black solid 1px;">
+            <td style="border: black solid 1px;">{{item.cinemaHomeName}}</td>
+            <td style="border: black solid 1px;">
+                <table style="width: 100%">
+                    <tr v-for="(row,i) in JSON.parse(item.cinemaHomeSeat)" >
+                        <td v-for="(col,j) in row">
+                            <span v-if="col===0"><img src="../../img/微信图片_20240127150302.png" width="15"></span>
+                            <span v-if="col===1"><img src="../../img/微信图片_20240127150236.png" width="15"></span>
+                            </td>
+                    </tr>
+                </table>
+            </td>
+            <td style="border: black solid 1px;" v-if="item.cinemaHomeState==0">封禁</td>
+            <td style="border: black solid 1px;"v-if="item.cinemaHomeState==1">正常</td>
+            <td style="border: black solid 1px;"v-if="item.cinemaHomeState==0"><input type="button" value="解封" @click="changeCinema(item.cinemaHomeId,1)"></td>
+            <td style="border: black solid 1px;"v-if="item.cinemaHomeState==1"><input type="button" value="封禁" @click="changeCinema(item.cinemaHomeId,0)"></td>
+            <td style="border: black solid 1px;"><input type="button" value="删除" @click="delCinema(item.cinemaHomeId)"></td>
+
+        </tr>
+
+    </table>
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el:"#app",
+        data:{
+           houseList:[],
+        },
+        methods:{
+
+            getCinemaList() {
+
+                let _this =this;
+               axios.post("http://localhost:8080/cinema/cinema/houselist").then((resp)=>{
+                   console.log(resp.data);
+                   if(resp.data.code===200){
+                       _this.houseList=resp.data.data;
+                   }else{
+                       alert(resp.data.msg);
+                   }
+
+               })
+
+            },
+            changeCinema(cid,state){
+                let _this = this;
+                axios.post("http://localhost:8080/cinema/cinema/changehousestate",
+                "cinemaHomeId="+cid+"&state="+state).then((resp)=>{
+                    console.log(resp.data);
+                    if(resp.data.code===200){
+                        _this.houseList=resp.data.data;
+                    }else{
+                        alert(resp.data.msg);
+                    }
+                })
+            }
+        },
+        mounted(){
+            this.getCinemaList();
+        }
+    })
+</script>

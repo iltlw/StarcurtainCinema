@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>订单详情</title>
+  <script src="../../js/axios0.18.js"></script>
+  <script src="../../js/vue.js"></script>
+</head>
+<body>
+<div id="app">
+  <img :src="orderList[0].arrange.movie.movieImgUrl"width="150">
+  <h1>{{orderList[0].arrange.movie.cinemaName}}</h1>
+<h3>{{orderList[0].arrange.cinemaHome.cinemaHomeName}}</h3>
+  <h3>{{orderList[0].arrange.movie.movieName}}</h3>
+  <table>
+    <tr>
+      <th>座位</th>
+    </tr>
+    <tr v-for="item in orderList">
+<td>第{{item.orderSeatRow+1}}排{{item.orderSeatCol+1}}座</td>
+    </tr>
+  </table>
+  </div>
+</body>
+</html>
+<script>
+  new Vue({
+    el:"#app",
+    data:{
+     payOrder:{},
+      orderList:[],
+    },
+    methods:{
+    getOrderList() {
+      let _this=this;
+      axios.post("http://localhost:8080/cinema/user/orderlist",
+      "payId=" +this.payOrder.payId).then((resp)=>{
+        console.log(resp.data);
+        if(resp.data.code===200){
+          _this.orderList=resp.data.data;
+      }else{
+          alert(resp.data.msg);
+        }
+      })
+    }
+    },
+    mounted(){
+      this.payOrder=JSON.parse(localStorage.getItem("payOrder"));
+this.getOrderList();
+    }
+  })
+</script>

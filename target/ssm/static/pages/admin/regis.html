@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    <script src="../../js/axios0.18.js"></script>
+    <script src="../../js/vue.js"></script>
+</head>
+<body>
+<div id="app">
+    平台名:<input type="text"v-model="platformName"><br/>
+    密码:<input type="password"v-model="password"><br/>
+    确认密码:<input type="password"v-model="again"><br/>
+    <input type="button" value="注册"@click="regis">
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el:"#app",
+        data: {
+            platformName: '',
+            password: '',
+            again: ''
+        },
+        methods:{
+            regis(){
+                if(this.password !==''&& this.password === this.again)
+                {
+                    let _this = this;
+                    axios({
+                        method: 'post',
+                        url:'http://localhost:8080/cinema/platform/regis',
+                        data:"platformName="+ _this.platformName + "&password=" + _this.password
+                    }).then(function(resp){
+                        console.log(resp.data);
+                        if(resp.data.code === 200){
+                            alert("注册成功");
+                        } else {
+                            alert(resp.data.msg);
+                        }
+                    })}
+                else {
+                    alert("密码不一致");
+                }
+            }
+        }
+    })
+</script>

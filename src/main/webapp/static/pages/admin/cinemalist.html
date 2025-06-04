@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>影院列表</title>
+    <script src="../../js/axios0.18.js"></script>
+    <script src="../../js/vue.js"></script>
+    <style>
+        table,tr,td,th{
+            margin: auto;
+            border: black solid 1px;
+            border-collapse: collapse;
+            width: 1000px;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+<div id="app" style="width: 100%">
+    <table>
+        <tr>
+            <th>影院名</th>
+            <th>影院地址</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+        <tr v-for="item in cinemaList">
+            <td>{{item.cinemaName}}</td>
+            <td>{{item.cinemaAddress}}影院地址</td>
+            <td v-if="item.cinemaState==0">封禁</td>
+            <td v-if="item.cinemaState==1">正常</td>
+            <td v-if="item.cinemaState==0"><input type="button" value="解封" @click="changeCinema(item.cinemaId,1)"></td>
+            <td v-if="item.cinemaState==1"><input type="button" value="封禁" @click="changeCinema(item.cinemaId,0)"></td>
+
+        </tr>
+    </table>
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el:"#app",
+        data:{
+            cinemaList:[],
+        },
+        methods:{
+            getCinemaList() {
+                let _this =this;
+                axios.post("http://localhost:8080/cinema/platform/cinemalist").then((resp)=>{
+                    console.log(resp.data);
+                    if(resp.data.code===200){
+                        _this.cinemaList=resp.data.data;
+                    }else{
+                        alert(resp.data.msg);
+                    }
+
+                })
+
+            },
+            changeCinema(mid,state){
+                let _this = this;
+                axios.post("http://localhost:8080/cinema/platform/changecinemastate",
+                    "cinemaId="+mid+"&state="+state).then((resp)=>{
+                    console.log(resp.data);
+                    if(resp.data.code===200){
+                        _this.getCinemaList();
+                    }else{
+                        alert(resp.data.msg);
+                    }
+                })
+            }
+        },
+        mounted(){
+            this.getCinemaList();
+        }
+    })
+</script>

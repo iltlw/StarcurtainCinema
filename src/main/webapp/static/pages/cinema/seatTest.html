@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../js/vue.js"></script>
+    <script src="../js/axios0.18.js"></script>
+</head>
+<body>
+<div id="app">
+    <input type="button" value="添加行" @click="addRow">
+    <input type="button" value="添加座位" @click="addCol">
+    <input type="button" value="添加过道" @click="addCol2">
+    <table>
+        <tr v-for="(row,i) in seatInfo">
+            <td v-for="(col,j) in row">
+                <span v-if="col===0" @click="selSeat(j,i)">空座</span>
+                <span v-if="col===1">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                <span v-if="col===2">锁定</span>
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el: "#app",
+        data: {
+            seatInfo: [],
+            nowRow: -1,
+
+        },
+        methods: {
+            addRow() {//[[],[],[]]
+                this.nowRow++;
+                this.seatInfo.push([]);
+            },
+            addCol() {
+                this.seatInfo[this.nowRow].push(0);
+            },
+            addCol2() {
+                this.seatInfo[this.nowRow].push(1);
+            }
+        }
+    })
+</script>

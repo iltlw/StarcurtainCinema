@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <script src="../../js/axios0.18.js"></script>
+    <script src="../../js/vue.js"></script>
+</head>
+<body>
+<div id="app">
+    影院名:<input type="text"v-model="username"><br/>
+    密码:<input type="password"v-model="password"><br/>
+    <input type="button" value="登录"@click="login">&nbsp;&nbsp;<a href="regis.html">注册</a>
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el:"#app",
+        data:{
+            username:'',
+            password:'',
+        },
+        methods:{
+            login() {
+                let _this = this;
+                axios({
+                    method: 'post',
+                    url: 'http://localhost:8080/cinema/cinema/login',
+                    data: "username=" + _this.username + "&password=" + _this.password
+                }).then(function (resp) {
+                    console.log(resp.data);
+                    if (resp.data.code === 200) {
+                        alert("登录成功")
+                        window.location = "home.html";
+                    }
+                });
+            }
+        }
+    })
+</script>

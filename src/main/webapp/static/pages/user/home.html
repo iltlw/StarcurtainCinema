@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>主页</title>
+    <script src="../../js/axios0.18.js"></script>
+    <script src="../../js/vue.js"></script>
+<style>
+    table,tr,td,th{
+        margin: auto;
+        border: black solid 1px;
+        border-collapse: collapse;
+        width: 1000px;
+        text-align: center;
+    }
+</style>
+</head>
+<body>
+<div id="app" style="width: 100%">
+    <input type="button" value="我的订单" @click="toOrderList">
+    <table>
+        <tr>
+            <th>海报</th>
+            <th>电影名</th>
+        </tr>
+        <tr v-for="item in movieList">
+            <td @click="toArrangeList(item)"><img :src="item.movieImgUrl" width="100"></td>
+            <td>{{item.movieName}}</td>
+        </tr>
+    </table></div>
+</body>
+</html>
+<script>
+    new Vue({
+        el:"#app",
+        data:{
+        movieList:[],
+        },
+        methods:{
+            toOrderList(){
+
+                window.location="orderList.html";
+            },
+
+            getMovieList() {
+                let _this =this;
+                axios.post("http://localhost:8080/cinema/user/movielist").then((resp)=>{
+                    console.log(resp.data);
+                    if(resp.data.code===200){
+                        _this.movieList=resp.data.data;
+                    }else{
+                        alert(resp.data.msg);
+                    }
+                })
+            },
+            toArrangeList(item){
+                localStorage.setItem("movie",JSON.stringify(item));
+                window.location="arrangeList.html";
+            }
+        },
+        mounted(){
+            this.getMovieList();
+        }
+    })
+</script>

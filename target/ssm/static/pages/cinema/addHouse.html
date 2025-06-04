@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>添加影厅</title>
+  <script src="../../js/axios0.18.js"></script>
+  <script src="../../js/vue.js"></script>
+</head>
+<body>
+<div id="app">
+  <form @submit.prevent="submitFrom">
+    影厅名：<input type="text" v-model="cname" required><br/>
+      <h3>座位布局</h3>
+      <input type="button" value="添加一排" @click="addRow">
+      <input type="button" value="添加座位" @click="addCol">
+      <input type="button" value="添加过道" @click="addCol2">
+      <input type="button" value="撤销" @click="del">
+      <table>
+        <tr v-for="(row,i) in seatInfo">
+          <td v-for="(col,j) in row">
+            <span v-if="col===0" @click="selSeat(j,i)"><img src="../../img/微信图片_20240127150302.png" width="21"></span>
+            <span v-if="col===1"><img src="../../img/微信图片_20240127150236.png" width="21"></span>
+            <span v-if="col===2"><img src="../../img/微信图片_20240127150255.png" width="21"></span>
+          </td>
+        </tr>
+      </table>
+    <br/>
+    <input type="submit" value="添加"><br>
+    <br>
+  </form>
+</div>
+</body>
+</html>
+<script>
+  new Vue({
+    el:"#app",
+    data:{
+      cname:'',
+      caddress:'',
+      seatInfo: [],
+      nowRow: -1,
+    },
+    methods:{
+      del(){
+        let len=this.seatInfo[this.nowRow].length;
+        if(len===0){
+          this.seatInfo.splice(this.seatInfo.length-1,1);
+          this.nowRow--;
+           len=this.seatInfo[this.nowRow].length;
+        }
+          this.seatInfo[this.nowRow].splice(len-1,1);
+
+
+      },
+      addRow() {//[[],[],[]]
+        this.nowRow++;
+        this.seatInfo.push([]);
+      },
+      addCol() {
+        this.seatInfo[this.nowRow].push(0);
+      },
+      addCol2() {
+        this.seatInfo[this.nowRow].push(1);
+      },
+      submitFrom() {
+        console.log(this.imgFile);
+        const formData = new FormData();
+        formData.append("cinemaHomeName", this.cname);
+        formData.append("cinemaHomeSeat", JSON.stringify(this.seatInfo));
+        axios.post("http://localhost:8080/cinema/cinema/addhouse", formData).then(function (resp) {
+          console.log(resp.data);
+          if (resp.data.code === 200) {
+            alert("添加成功");
+            window.location="home.html";
+          }else{
+            alert(resp.data.msg);
+          }
+        });
+      }
+    }
+  })
+</script>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>电影列表</title>
+    <script src="../../js/axios0.18.js"></script>
+    <script src="../../js/vue.js"></script>
+    <style>
+        table,tr,td,th{
+            margin: auto;
+            border: black solid 1px;
+            border-collapse: collapse;
+            width: 1000px;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+<div id="app" style="width: 100%">
+    <table>
+        <tr>
+            <th>海报</th>
+            <th>电影名</th>
+            <th>时长</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+        <tr v-for="item in movieList">
+            <td><img :src="item.movieImgUrl" width="100"></td>
+            <td>{{item.movieName}}</td>
+            <td>{{item.movieTime}}分钟</td>
+            <td v-if="item.movieState==0">封禁</td>
+            <td v-if="item.movieState==1">正常</td>
+            <td v-if="item.movieState==0"><input type="button" value="解封" @click="changeMovie(item.movieId,1)"></td>
+            <td v-if="item.movieState==1"><input type="button" value="封禁" @click="changeMovie(item.movieId,0)"></td>
+
+        </tr>
+
+    </table>
+</div>
+</body>
+</html>
+<script>
+    new Vue({
+        el:"#app",
+        data:{
+           movieList:[],
+        },
+        methods:{
+            getMovieList() {
+                let _this =this;
+               axios.post("http://localhost:8080/cinema/platform/movielist").then((resp)=>{
+                   console.log(resp.data);
+                   if(resp.data.code===200){
+                       _this.movieList=resp.data.data;
+                   }else{
+                       alert(resp.data.msg);
+                   }
+
+               })
+
+            },
+            changeMovie(mid,state){
+                let _this = this;
+                axios.post("http://localhost:8080/cinema/platform/changemoviestate",
+                "movieId="+mid+"&state="+state).then((resp)=>{
+                    console.log(resp.data);
+                    if(resp.data.code===200){
+                        _this.movieList=resp.data.data;
+                    }else{
+                        alert(resp.data.msg);
+                    }
+                })
+            }
+        },
+        mounted(){
+            this.getMovieList();
+        }
+    })
+</script>
