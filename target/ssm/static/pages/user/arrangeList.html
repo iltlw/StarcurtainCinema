@@ -31,7 +31,7 @@
         <td>{{item.cinemaHome.cinemaHomeName}}</td>
         <td>{{getDateStr(new Date(item.arrangeMovieStartTime))}}</td>
         <td>{{getDateStr(new Date(item.arrangeMovieEndTime))}}</td>
-        <td>{{item.arrangeMoney/100}}</td>
+        <td>{{item.arrangeMoney}}</td>
         <td>
           <input type="button" value="购买" @click="buy(item)">
         </td>
