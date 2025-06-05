@@ -13,12 +13,29 @@
       width: 1000px;
       text-align: center;
     }
-
+    .debug {
+      max-height: 300px;
+      overflow: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin: 10px;
+      font-family: monospace;
+    }
   </style>
 </head>
 <body>
 <div id="app" style="width: 100%">
-  <table>
+  <div v-if="loading">加载中...</div>
+  <div v-if="error" style="color: red;">{{ error }}</div>
+
+  <!-- 调试信息，用于查看数据结构 -->
+  <div class="debug" v-show="debugMode">
+    <pre>{{ arrangeList }}</pre>
+  </div>
+
+  <button @click="debugMode = !debugMode">切换调试模式</button>
+
+  <table v-if="arrangeList.length">
     <tr>
       <th>电影名</th>
       <th>影厅名</th>
@@ -28,15 +45,15 @@
       <th>状态</th>
     </tr>
     <tr v-for="item in arrangeList">
-      <td>{{item.movie.movieName}}</td>
-      <td>{{item.cinemaHome.cinemaHomeName}}</td>
-      <td>{{getDateStr(new Date(item.arrangeMovieStartTime))}}</td>
-      <td>{{getDateStr(new Date(item.arrangeMovieEndTime))}}</td>
-      <td>{{item.arrangeMoney/100}}</td>
-      <td v-if="item.arrangeState==0">关闭</td>
-      <td v-if="item.arrangeState==1">正常</td>
+      <td>{{item.movieName}}</td>
+      <td>{{item.cinemaHomeName}}</td>
+      <td>{{formatDate(item.arrangeMovieStartTime)}}</td>
+      <td>{{formatDate(item.arrangeMovieEndTime)}}</td>
+      <td>{{(item.arrangeMoney/100).toFixed(2)}}</td>
+      <td>{{item.arrangeState === 0 ? '关闭' : '正常'}}</td>
     </tr>
   </table>
+  <div v-else-if="!loading && !error">没有找到排片信息</div>
 </div>
 </body>
 </html>
@@ -45,43 +62,79 @@
     el:"#app",
     data:{
       arrangeList:[],
+      loading: true,
+      error: null,
+      debugMode: false
     },
     methods:{
-      getDateStr(date){
-        return date.getFullYear()+"/"+
-                (date.getMonth()+1)+"/"+
-                date.getDate()+" "+
-                date.getHours()+":"+
-                date.getMinutes()+":"+date.getSeconds();
+      formatDate(timestamp) {
+        if (!timestamp) return '未知时间';
+        try {
+          const date = new Date(timestamp);
+          return `${date.getFullYear()}/${padZero(date.getMonth()+1)}/${padZero(date.getDate())} ${padZero(date.getHours())}:${padZero(date.getMinutes())}:${padZero(date.getSeconds())}`;
+        } catch (e) {
+          console.error('日期格式化错误:', e);
+          return timestamp;
+        }
       },
       getArrangeList() {
-        let _this =this;
-        axios.post("http://localhost:8080/cinema/cinema/arrangelist").then((resp)=>{
-          console.log(resp.data);
-          if(resp.data.code===200){
-            _this.arrangeList=resp.data.data;
-          }else{
-            alert(resp.data.msg);
-          }
-
-        })
-
+        this.loading = true;
+        this.error = null;
+        axios.post("http://localhost:8080/cinema/cinema/arrangelist")
+                .then((resp) => {
+                  console.log('API响应:', resp.data);
+                  if (resp.data.code === 200) {
+                    // 处理数据，确保结构一致
+                    this.arrangeList = (resp.data.data || []).map(item => ({
+                      ...item,
+                      movieName: item.movie?.movieName || '未知',
+                      cinemaHomeName: item.cinemaHome?.cinemaHomeName || '未知',
+                      arrangeMovieStartTime: item.arrangeMovieStartTime,
+                      arrangeMovieEndTime: item.arrangeMovieEndTime,
+                      arrangeMoney: item.arrangeMoney,
+                      arrangeState: item.arrangeState
+                    }));
+                    console.log('处理后的排片列表:', this.arrangeList);
+                    alert(`加载了 ${this.arrangeList.length} 条排片信息`);
+                  } else {
+                    this.error = resp.data.msg || '获取排片列表失败';
+                    alert(this.error);
+                  }
+                })
+                .catch((error) => {
+                  this.error = `网络错误: ${error.message}`;
+                  console.error('获取排片列表错误:', error);
+                  alert(this.error);
+                })
+                .finally(() => {
+                  this.loading = false;
+                });
       },
-      changeCinema(mid,state){
-        let _this = this;
+      changeCinema(mid, state) {
         axios.post("http://localhost:8080/cinema/platform/changecinemastate",
-                "cinemaId="+mid+"&state="+state).then((resp)=>{
-          console.log(resp.data);
-          if(resp.data.code===200){
-            _this.getArrangeList();
-          }else{
-            alert(resp.data.msg);
-          }
-        })
+                `cinemaId=${mid}&state=${state}`)
+                .then((resp) => {
+                  console.log('修改状态响应:', resp.data);
+                  if (resp.data.code === 200) {
+                    alert('状态修改成功');
+                    this.getArrangeList();
+                  } else {
+                    alert(resp.data.msg || '修改状态失败');
+                  }
+                })
+                .catch((error) => {
+                  console.error('修改状态错误:', error);
+                  alert(`网络错误: ${error.message}`);
+                });
       }
     },
-    mounted(){
+    mounted() {
       this.getArrangeList();
     }
-  })
+  });
+
+  // 辅助函数：数字补零
+  function padZero(num) {
+    return num < 10 ? '0' + num : num;
+  }
 </script>
